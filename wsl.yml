@@ -1,0 +1,45 @@
+---
+
+- hosts: localhost
+
+  vars:
+    git_location: "~/git"
+    bin_location: /usr/local/bin/
+    
+  tasks:
+  - name: install apt packages
+    apt:
+      pkg:
+      - tree 
+      state: latest
+    become: true
+
+  - name: get pip script
+    get_url:
+      url: https://bootstrap.pypa.io/get-pip.py
+      dest: /tmp/get-pip.py
+
+  - name: install pip
+    shell: python /tmp/get-pip.py
+
+  - name: install python dependencies
+    pip:
+      name:
+      - jmespath
+
+  - name: get latest terraform version id
+    uri:
+      url: 'https://checkpoint-api.hashicorp.com/v1/check/terraform'
+      method: GET
+      status_code: 200
+      timeout: 10
+    register: release
+  
+  - set_fact:
+      tf_version: "{{ release.json | json_query('current_version') }}"
+  
+  - name: terraform is present
+    unarchive:
+      src: 'https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip'
+      dest: /usr/local/bin 
+      remote_src: yes
