@@ -12,6 +12,7 @@
       pkg:
       - tree 
       - awscli
+      - neovim
       state: latest
     become: true
 
@@ -44,9 +45,16 @@
       src: 'https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip'
       dest: /usr/local/bin 
       remote_src: yes
+    become: true
 
   - name: set up .vimrc symlink
     file:
       src: "{{ playbook_dir }}/.vimrc"
       dest: "~/.vimrc"
       state: link
+
+  - name: add vim alias for nvim
+    lineinfile:
+      path: "~/.bash_profile"
+      line: "alias vim='nvim -S ~/.vimrc'"
+      state: present
