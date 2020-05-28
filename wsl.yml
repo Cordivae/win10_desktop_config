@@ -43,10 +43,30 @@
   - name: terraform is present
     unarchive:
       src: 'https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip'
-      dest: /usr/local/bin 
+      dest: /usr/local/bin
       remote_src: yes
     become: true
 
+  - name: get tflint releases
+    uri:
+      url: https://api.github.com/repos/terraform-linters/tflint/releases/latest
+      method: GET
+      status_code: 200
+      timeout: 10
+    register: tflint_release
+
+  - set_fact:
+      tflint_download_url: "{{ tflint_release.json | json_query(jmesquery) }}"
+    vars:
+      jmesquery: "assets[?name==`tflint_linux_amd64.zip`].browser_download_url"
+
+  - name: tflint is present
+    unarchive:
+      src: "{{ tflint_download_url[0] }}"
+      dest: /usr/local/bin 
+      remote_src: yes
+    become: true
+     
   - name: set up .vimrc symlink
     file:
       src: "{{ playbook_dir }}/.vimrc"
