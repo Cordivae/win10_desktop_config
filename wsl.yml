@@ -43,7 +43,7 @@
   - name: terraform is present
     unarchive:
       src: 'https://releases.hashicorp.com/terraform/{{ tf_version }}/terraform_{{ tf_version }}_linux_amd64.zip'
-      dest: /usr/local/bin
+      dest: "{{ bin_location }}"
       remote_src: yes
     become: true
 
@@ -63,7 +63,7 @@
   - name: tflint is present
     unarchive:
       src: "{{ tflint_download_url[0] }}"
-      dest: /usr/local/bin 
+      dest: "{{ bin_location }}"
       remote_src: yes
     become: true
      
@@ -73,8 +73,11 @@
       dest: "~/.vimrc"
       state: link
 
-  - name: add vim alias for nvim
+  - name: shortcut aliases
     lineinfile:
       path: "~/.bash_profile"
-      line: "alias vim='nvim -S ~/.vimrc'"
+      line: "{{ item }}"
       state: present
+    loop:
+      - "alias vim='nvim -S ~/.vimrc'"
+      - "alias tf=terraform"
