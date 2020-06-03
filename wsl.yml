@@ -12,6 +12,7 @@
       - tree 
       - awscli
       - neovim
+      - graphviz
       state: latest
     become: true
 
